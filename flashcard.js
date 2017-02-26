@@ -8,9 +8,6 @@ function BasicCard(basicFront, basicBack) {
     this.basicBack = basicBack;
 }
 
-var bCardOne = new BasicCard("What is 2 + 2", 4);
-console.log(bCardOne.basicFront);
-
 
 // Inquirer asks whether to post a bid or bid on one
 var start = function() {
@@ -40,8 +37,42 @@ var start = function() {
 start();
 
 function makeBlankCard() {
-    console.log("cool");
+    inquirer.prompt([{
+            name: "blankquestion",
+            type: "input",
+            message: "Type a question"
+
+        }, {
+            name: "blankanswer",
+            type: "input",
+            message: "Type in an answer to your question"
+
+        }
+
+    ]).then(function(answer) {
+        console.log(answer.blankquestion);
+        console.log(answer.blankanswer);
+
+
+        inquirer.prompt([{
+                name: "confirmation",
+                type: "confirm",
+                message: "Would you like to add another notecard?"
+            }
+
+        ]).then(function(response) {
+
+        	if (response.confirmation){
+        		makeBlankCard()
+        	}
+            else {
+            	return;
+            }
+
+        });
+    });
 }
+
 
 function makeClozeCard() {
     console.log("cooler");
