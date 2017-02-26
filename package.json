@@ -1,0 +1,29 @@
+{
+  "name": "flashcard_generator",
+  "version": "1.0.0",
+  "description": "generate flashcards with node",
+  "main": "flashcard.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jwin4740/flashcard_generator.git"
+  },
+  "keywords": [
+    "education",
+    "trivia",
+    "school",
+    "flashcards"
+  ],
+  "author": "James J Winkle",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jwin4740/flashcard_generator/issues"
+  },
+  "homepage": "https://github.com/jwin4740/flashcard_generator#readme",
+  "dependencies": {
+    "inquirer": "^3.0.4",
+    "require": "^2.4.20"
+  }
+}
