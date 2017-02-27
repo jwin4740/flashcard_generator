@@ -1,18 +1,19 @@
-// dependency for inquirer npm package
+// NPM packages
 var inquirer = require("inquirer");
-// NPM Package for reading and writing files
 var fs = require("fs");
 
-var questionBankArray = [];
+//----------global variables----------//
+var questionBankArray = []; // will hold the array of generated flashcards if user selects "quiz"
 var randomNum = 0;
 var n = 0; // will hold the questionBankArray length
-var typeofCard = "";
+var typeofCard = ""; // either cloze or basic
 var quizDisplayCount = 0;
 var partialString = "";
 var textString = "";
-var novoBasicCard;
-var novoClozeCard;
-// basic card constructor function
+var novoBasicCard; // variable for storing the new BasicCard object
+var novoClozeCard; // variable for storing the new ClozeCard object
+var validate;
+
 
 
 
@@ -35,34 +36,39 @@ var novoClozeCard;
 // }
 // Wheel.prototype = new CarPart();
 
-
+// basic card constructor function
 function BasicCard(basicFront, basicBack) {
     this.basicFront = basicFront;
     this.basicBack = basicBack;
 }
 
+// cloze card constructor function
 function ClozeCard(clozeFront, clozeBack) {
     this.clozeFront = clozeFront;
     this.clozeBack = clozeBack;
 }
 
+//clozeCard method for getting the cloze flashcard
 ClozeCard.prototype.getPartial = function() {
-    console.log(`Your formatted ClozeCard is:\n\n   ${partialString}`);
+    console.log(`Your formatted ClozeCard is:\n\n   ${partialString}\n`);
 }
+
+// starting function executed upon program load
+// gives the user a list of four choices, and executes functions accordingly
 var start = function() {
     inquirer.prompt([{
         name: "card",
         type: "list",
-        message: "Which type of flashcard do you want to might?",
-        choices: ["basic", "cloze", "quizme", "I don't want to learn"]
+        message: "How can I assist you with your learning?\n",
+        choices: ["make a basic flashcard", "make a cloze flashcard", "quizme", "I don't want to learn"]
     }]).then(function(answer) {
 
         switch (answer.card) {
-            case "basic":
+            case "make a basic flashcard":
                 makeBlankCard();
                 break;
 
-            case "cloze":
+            case "make a cloze flashcard":
                 makeClozeCard();
                 break;
 
@@ -98,10 +104,12 @@ function makeBlankCard() {
 
 
     ]).then(function(answer) {
+        // gathers user input and creates a new BasicCard object and stores it in novoBasicCard
 
-        var novoBasicCard = new BasicCard(answer.blankquestion, answer.blankanswer);
-        // This block of code will create a file called "movies.txt".
-        // It will then print "Inception, Die Hard" in the file
+        novoBasicCard = new BasicCard(answer.blankquestion, answer.blankanswer);
+
+        // uses the JSON.stringify function to format our object and append it to the file
+        // semicolon separates each successive object appended
         fs.appendFile("basicbank.txt", ';' + JSON.stringify(novoBasicCard), function(err) {
 
             // If the code experiences any errors it will log the error to the console.
@@ -110,6 +118,7 @@ function makeBlankCard() {
             }
         });
 
+        // if user wanted to make another basic card, it recursively calls itself
         if (answer.confirmation) {
             makeBlankCard()
         } else {
@@ -140,35 +149,56 @@ function makeClozeCard() {
     ]).then(function(answer) {
 
         novoClozeCard = new ClozeCard(answer.fulltextq, answer.clozeq);
-        // This block of code will create a file called "movies.txt".
-        // It will then print "Inception, Die Hard" in the file
+        validate = answer.confirmation;
+        // uses the JSON.stringify function to format our object and append it to the file
+        // semicolon separates each successive object appended
         fs.appendFile("clozebank.txt", ';' + JSON.stringify(novoClozeCard), function(err) {
 
-            // If the code experiences any errors it will log the error to the console.
+            // If the code experiences any errors during the append process it will log the error to the console.
             if (err) {
                 return console.log(err);
             }
-
-
-            textString = novoClozeCard.clozeFront;
-            partialString = textString.replace(novoClozeCard.clozeBack, "__________");
-            novoClozeCard.getPartial();
-            if (answer.confirmation) {
-                makeClozeCard();
-            } else {
-                return;
-            }
         });
+        validCloze();
     });
 }
 
+// validates whether the user correctly inputed the cloze card
+function validCloze() {
+
+    textString = novoClozeCard.clozeFront;
+    var bool = textString.includes(novoClozeCard.clozeBack); // see if the question contains the cloze statement  (returns true or false)
+    partialString = textString.replace(novoClozeCard.clozeBack, "__________"); // stores formatted flashcard which is used if the getPartial function is called
+
+    // if the user inputs an invalid cloze statement, they are prompted to retry
+    if (bool === false) {
+        console.log("\n\nERROR!!! Somewhere in your question you must have your cloze word");
+        console.log(`Example:  
+        	?Type in a question:      George Washington was the first president of the United States 
+        	?Type in the cloze:       George Washington\n 
+--------------------------------------------------------------------------------------------\n\nTRY AGAIN!!!!\n `);
+        makeClozeCard();
+    }
+
+    // if user flashcard is valid and they want to create another one
+    if (validate && bool === true) {
+        console.log("\nYou successfully created a cloze flashcard!!!");
+
+        novoClozeCard.getPartial(); // displays the users generated clozeCard and recalls the makeClozeCard function
+        makeClozeCard();
+    }
+
+    // if user flashcard is valid and they do not want to create another one
+    if (!validate && bool === true) {
+        console.log("\nYou successfully created a cloze flashcard!!!");
+        novoClozeCard.getPartial(); // displays the users generated clozeCard 
+    }
 
 
+}
 
 
-var count = 0;
-var time;
-
+// if the user doesn't want to learn; they will be reprompted anyway
 function lazy() {
 
     console.log("too bad, sucker");
@@ -177,7 +207,7 @@ function lazy() {
 }
 
 
-
+// if user selects quiz, then they get to choose from which cardset
 function quizMe() {
     inquirer.prompt([{
             name: "cardtype",
@@ -197,10 +227,13 @@ function quizMe() {
     });
 }
 
+
+// uses filename and flashcard type as parameters to read the correct file 
 function readBank(fileName, type) {
     typeofCard = type;
     console.log("type of card is: " + typeofCard);
 
+    // reads and parses the elements of the file and pushes each element into the questionBankArray
     fs.readFile(fileName, "utf8", function(error, data) {
 
         var split = data.split(";");
@@ -216,6 +249,7 @@ function readBank(fileName, type) {
 
 }
 
+// shuffles the questionBankArray and initiates the respective function
 function shuffleBank() {
     n = questionBankArray.length;
     for (var i = 0; i < n; i++) {
@@ -237,7 +271,7 @@ function shuffleBank() {
 
 function displayBlankCard() {
 
-    var element = questionBankArray.pop();
+    var element = questionBankArray.pop(); // pops out the last element of the questionBankArray and quizzes the user
     inquirer.prompt([{
             name: "question",
             type: "input",
@@ -249,19 +283,20 @@ function displayBlankCard() {
         if (answer.question === element.basicBack) {
             console.log("YOU are correct");
         } else {
-            console.log("Wrong-o");
+            console.log("Wrong-o\n");
         }
         quizDisplayCount--;
-        console.log(quizDisplayCount);
+        
         if (quizDisplayCount === 0) {
             console.log("You are done");
             return;
         } else {
-            displayBlankCard();
+            displayBlankCard(); // this function will keep getting called until there are no questions left in the array (i.e. all elements have been popped out)
         }
     });
 }
 
+// similar logic as the displayBlankCard function
 function displayClozeCard() {
 
     var element = questionBankArray.pop();
@@ -281,10 +316,10 @@ function displayClozeCard() {
         if (answer.question === temp) {
             console.log("YOU are correct");
         } else {
-            console.log("Wrong-o");
+            console.log("Wrong-o\n");
         }
         quizDisplayCount--;
-        console.log(quizDisplayCount);
+      
         if (quizDisplayCount === 0) {
             console.log("You are done");
             return;
