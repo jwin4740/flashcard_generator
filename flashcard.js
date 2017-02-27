@@ -15,17 +15,21 @@ function ClozeCard(fullText, clozePart) {
     this.clozePart = clozePart;
 }
 
-ClozeCard.prototype.getPartial = function () {
-	console.log(this.fullText);
-
-}
-
-
 
 var novoCloze = new ClozeCard("George Washington is the first president of the United States", "George Washington");
 var textString = novoCloze.fullText;
 var partialString = textString.replace(novoCloze.clozePart, "__________");
-console.log("Your formatted ClozeCard is:\n\n" + partialString);
+ClozeCard.prototype.getPartial = function () {
+	console.log(`       Your formatted ClozeCard is:\n\n       ${partialString}`);
+
+}
+
+novoCloze.getPartial();
+
+
+
+
+
 
 
 
