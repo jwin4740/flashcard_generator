@@ -6,6 +6,12 @@ var fs = require("fs");
 var questionBankArray = [];
 var randomNum = 0;
 var n = 0; // will hold the questionBankArray length
+var typeofCard = "";
+var quizDisplayCount = 0;
+var partialString = "";
+var textString = "";
+var novoBasicCard;
+var novoClozeCard;
 // basic card constructor function
 
 
@@ -28,19 +34,16 @@ var n = 0; // will hold the questionBankArray length
 //   this.radius = radius;
 // }
 // Wheel.prototype = new CarPart();
-var partialString = "";
-var textString = "";
-var novoBasicCard;
-var novoClozeCard;
+
 
 function BasicCard(basicFront, basicBack) {
     this.basicFront = basicFront;
     this.basicBack = basicBack;
 }
 
-function ClozeCard(fullText, clozePart) {
-    this.fullText = fullText;
-    this.clozePart = clozePart;
+function ClozeCard(clozeFront, clozeBack) {
+    this.clozeFront = clozeFront;
+    this.clozeBack = clozeBack;
 }
 
 ClozeCard.prototype.getPartial = function() {
@@ -147,9 +150,14 @@ function makeClozeCard() {
             }
 
 
-            textString = novoClozeCard.fullText;
-            partialString = textString.replace(novoClozeCard.clozePart, "__________");
+            textString = novoClozeCard.clozeFront;
+            partialString = textString.replace(novoClozeCard.clozeBack, "__________");
             novoClozeCard.getPartial();
+            if (answer.confirmation) {
+                makeClozeCard();
+            } else {
+                return;
+            }
         });
     });
 }
@@ -181,15 +189,17 @@ function quizMe() {
     ]).then(function(answer) {
 
         if (answer.cardtype === "cloze") {
-            readBank("clozebank.txt");
+            readBank("clozebank.txt", "cloze");
         } else {
-            readBank("basicbank.txt");
+            readBank("basicbank.txt", "basic");
         }
 
     });
 }
 
-function readBank(fileName) {
+function readBank(fileName, type) {
+    typeofCard = type;
+    console.log("type of card is: " + typeofCard);
 
     fs.readFile(fileName, "utf8", function(error, data) {
 
@@ -209,38 +219,77 @@ function readBank(fileName) {
 function shuffleBank() {
     n = questionBankArray.length;
     for (var i = 0; i < n; i++) {
-        var randomNum = Math.floor(Math.random() * n + 1);
+        var randomNum = Math.floor(Math.random() * n);
         var temp = questionBankArray[i];
         questionBankArray[i] = questionBankArray[randomNum];
         questionBankArray[randomNum] = temp;
     }
-    console.log(questionBankArray);
+
+    quizDisplayCount = questionBankArray.length;
+    if (typeofCard === "cloze") {
+        displayClozeCard();
+    } else {
+        displayBlankCard();
+    }
+
 
 }
 
-function displayCard() {
+function displayBlankCard() {
+
+    var element = questionBankArray.pop();
     inquirer.prompt([{
-            name: "cardtype",
-            type: "list",
-            message: "Which cardset would you like to review?",
-            choices: ["cloze", "basic"]
+            name: "question",
+            type: "input",
+            message: element.basicFront
         }
 
     ]).then(function(answer) {
 
-        if (answer.cardtype === "cloze") {
-            readBank("clozebank.txt");
+        if (answer.question === element.basicBack) {
+            console.log("YOU are correct");
         } else {
-            readBank("basicbank.txt");
+            console.log("Wrong-o");
+        }
+        quizDisplayCount--;
+        console.log(quizDisplayCount);
+        if (quizDisplayCount === 0) {
+            console.log("You are done");
+            return;
+        } else {
+            displayBlankCard();
+        }
+    });
+}
+
+function displayClozeCard() {
+
+    var element = questionBankArray.pop();
+    var temp = element.clozeBack;
+    textString = element.clozeFront;
+
+    partialString = textString.replace(temp, "__________");
+
+    inquirer.prompt([{
+            name: "question",
+            type: "input",
+            message: partialString + "\n ANSWER: "
         }
 
+    ]).then(function(answer) {
+
+        if (answer.question === temp) {
+            console.log("YOU are correct");
+        } else {
+            console.log("Wrong-o");
+        }
+        quizDisplayCount--;
+        console.log(quizDisplayCount);
+        if (quizDisplayCount === 0) {
+            console.log("You are done");
+            return;
+        } else {
+            displayClozeCard();
+        }
     });
-    // var n = questionBankArray.length;
-    // randomNum = Math.floor(Math.random() * n + 1);
-    // console.log(randomNum);
-    // var element = questionBankArray.pop();
-
-    // console.log(element.basicFront);
-
-
 }

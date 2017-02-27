@@ -1,1 +1,1 @@
-{"fullText":"alexander hamilton is on the ten dollar bill","clozePart":"alexander hamilton"}
+{"clozeFront":"Lin wrote Hamilton","clozeBack":"Lin"};{"clozeFront":"Bears are the best","clozeBack":"Bears"};{"clozeFront":"The color of the sky is blue","clozeBack":"blue"}
