@@ -3,6 +3,9 @@ var inquirer = require("inquirer");
 // NPM Package for reading and writing files
 var fs = require("fs");
 
+var questionBankArray = [];
+var randomNum = 0;
+var n = 0; // will hold the questionBankArray length
 // basic card constructor function
 
 
@@ -189,14 +192,55 @@ function quizMe() {
 function readBank(fileName) {
 
     fs.readFile(fileName, "utf8", function(error, data) {
-        // the first parameter is always an error which gets sets to null if there is no error
-        // We will then print the contents of data
 
         var split = data.split(";");
-        console.log(split.length);
         for (var i = 0; i < split.length; i++) {
             var parsed = JSON.parse(split[i]);
-            console.log(parsed);
+            questionBankArray.push(parsed);
+
         }
+
+        shuffleBank();
     });
+
+
+}
+
+function shuffleBank() {
+    n = questionBankArray.length;
+    for (var i = 0; i < n; i++) {
+        var randomNum = Math.floor(Math.random() * n + 1);
+        var temp = questionBankArray[i];
+        questionBankArray[i] = questionBankArray[randomNum];
+        questionBankArray[randomNum] = temp;
+    }
+    console.log(questionBankArray);
+
+}
+
+function displayCard() {
+    inquirer.prompt([{
+            name: "cardtype",
+            type: "list",
+            message: "Which cardset would you like to review?",
+            choices: ["cloze", "basic"]
+        }
+
+    ]).then(function(answer) {
+
+        if (answer.cardtype === "cloze") {
+            readBank("clozebank.txt");
+        } else {
+            readBank("basicbank.txt");
+        }
+
+    });
+    // var n = questionBankArray.length;
+    // randomNum = Math.floor(Math.random() * n + 1);
+    // console.log(randomNum);
+    // var element = questionBankArray.pop();
+
+    // console.log(element.basicFront);
+
+
 }
