@@ -18,25 +18,6 @@ var lazinessCheatCount = 0;
 
 
 
-// function CarPart(name) {
-//   if(this instanceof CarPart) {
-//     this.name = name;
-//   } else {
-//     return new CarPart(name);
-//   }
-// }
-
-// Note: Wheel should be made new/scope safe as well.
-
-// In the above example, within the Wheel constructor, CarPart.call is what invokes the parent constructor, known as constructor stealing. When CarPart's constructor is called, this instanceof CarPart will fail because this is an instance of Wheel.
-
-// The solution to this problem lies within the Wheel's prototype. If we set the following after the declaration of Wheel, the inheritance chain is correctly established and this instanceof CarPart will return true if this is a Wheel. 
-// function Wheel(radius) {
-//   CarPart.call(this, 'Wheel');
-//   this.radius = radius;
-// }
-// Wheel.prototype = new CarPart();
-
 // scope safe basic card constructor function
 function BasicCard(basicFront, basicBack) {
     if (this instanceof BasicCard) {
@@ -45,8 +26,6 @@ function BasicCard(basicFront, basicBack) {
     } else {
         return new BasicCard(basicFront, basicBack);
     }
-
-
 }
 
 // scope safe cloze card constructor function 
