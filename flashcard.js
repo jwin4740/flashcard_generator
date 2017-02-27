@@ -192,8 +192,11 @@ function readBank(fileName) {
         // the first parameter is always an error which gets sets to null if there is no error
         // We will then print the contents of data
 
-var split = data.split(";");
-var parsed = JSON.parse(split[5]);
-        console.log(parsed);
+        var split = data.split(";");
+        console.log(split.length);
+        for (var i = 0; i < split.length; i++) {
+            var parsed = JSON.parse(split[i]);
+            console.log(parsed);
+        }
     });
 }
