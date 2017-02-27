@@ -1,0 +1,1 @@
+{"basicFront":"who is hamilton","basicBack":"lin"};{"basicFront":"what sport has bears","basicBack":"football"};{"basicFront":"what is the capital of wisconsin","basicBack":"madison"};
