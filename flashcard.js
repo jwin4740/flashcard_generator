@@ -283,13 +283,27 @@ function displayBlankCard() {
         if (answer.question === element.basicBack) {
             console.log("YOU are correct");
         } else {
-            console.log("Wrong-o\n");
+            console.log("\nWRONG-O\n");
         }
         quizDisplayCount--;
-        
+// at the end of the quiz the user has the choice to take another quiz
         if (quizDisplayCount === 0) {
-            console.log("You are done");
-            return;
+
+            inquirer.prompt([{
+                    name: "confirmquiz",
+                    type: "confirm",
+                    message: "Would you like to quiz yourself again?\n"
+                }
+
+            ]).then(function(answer) {
+                if (answer.confirmquiz) {
+                    quizMe();
+                } else {
+                    console.log("Thank you for studying!!");
+                    return;
+                }
+
+            });
         } else {
             displayBlankCard(); // this function will keep getting called until there are no questions left in the array (i.e. all elements have been popped out)
         }
@@ -316,13 +330,23 @@ function displayClozeCard() {
         if (answer.question === temp) {
             console.log("YOU are correct");
         } else {
-            console.log("Wrong-o\n");
+            console.log("\nWRONG-O\n");
         }
         quizDisplayCount--;
-      
+
         if (quizDisplayCount === 0) {
-            console.log("You are done");
-            return;
+            inquirer.prompt([{
+                name: "confirmquiz",
+                type: "confirm",
+                message: "Would you like to quiz yourself again?\n"
+            }]).then(function(answer) {
+                if (answer.confirmquiz) {
+                    quizMe();
+                } else {
+                    console.log("Thank you for studying!!");
+                    return;
+                }
+            });
         } else {
             displayClozeCard();
         }
