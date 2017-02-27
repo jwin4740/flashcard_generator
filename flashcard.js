@@ -13,6 +13,7 @@ var textString = "";
 var novoBasicCard; // variable for storing the new BasicCard object
 var novoClozeCard; // variable for storing the new ClozeCard object
 var validate;
+var lazinessCheatCount = 0;
 
 
 
@@ -36,16 +37,26 @@ var validate;
 // }
 // Wheel.prototype = new CarPart();
 
-// basic card constructor function
+// scope safe basic card constructor function
 function BasicCard(basicFront, basicBack) {
-    this.basicFront = basicFront;
-    this.basicBack = basicBack;
+    if (this instanceof BasicCard) {
+        this.basicFront = basicFront;
+        this.basicBack = basicBack;
+    } else {
+        return new BasicCard(basicFront, basicBack);
+    }
+
+
 }
 
-// cloze card constructor function
+// scope safe cloze card constructor function 
 function ClozeCard(clozeFront, clozeBack) {
-    this.clozeFront = clozeFront;
-    this.clozeBack = clozeBack;
+    if (this instanceof ClozeCard) {
+        this.clozeFront = clozeFront;
+        this.clozeBack = clozeBack;
+    } else {
+        return new ClozeCard(clozeFront, clozeBack);
+    }
 }
 
 //clozeCard method for getting the cloze flashcard
@@ -85,6 +96,8 @@ var start = function() {
 }
 start();
 
+
+// inquirer prompts for making the blank cards
 function makeBlankCard() {
     inquirer.prompt([{
             name: "blankquestion",
@@ -106,7 +119,7 @@ function makeBlankCard() {
     ]).then(function(answer) {
         // gathers user input and creates a new BasicCard object and stores it in novoBasicCard
 
-        novoBasicCard = new BasicCard(answer.blankquestion, answer.blankanswer);
+        novoBasicCard = BasicCard(answer.blankquestion, answer.blankanswer);
 
         // uses the JSON.stringify function to format our object and append it to the file
         // semicolon separates each successive object appended
@@ -148,7 +161,7 @@ function makeClozeCard() {
 
     ]).then(function(answer) {
 
-        novoClozeCard = new ClozeCard(answer.fulltextq, answer.clozeq);
+        novoClozeCard = ClozeCard(answer.fulltextq, answer.clozeq);
         validate = answer.confirmation;
         // uses the JSON.stringify function to format our object and append it to the file
         // semicolon separates each successive object appended
@@ -198,12 +211,17 @@ function validCloze() {
 }
 
 
-// if the user doesn't want to learn; they will be reprompted anyway
+// if the user doesn't want to learn; they will be reprompted anyway unless they select it 10 times
 function lazy() {
-
-    console.log("too bad, sucker");
-    console.log("---------------\n");
-    setTimeout(start, 1000);
+    if (lazinessCheatCount < 10) {
+        console.log("too bad, sucker");
+        console.log("---------------\n");
+        lazinessCheatCount++;
+        setTimeout(start, 1000);
+    } else {
+        console.log("Incredible!!! Your persistence to avoid learning is impressive. I will stop asking now, goodbye.\n");
+        return;
+    }
 }
 
 
@@ -286,7 +304,7 @@ function displayBlankCard() {
             console.log("\nWRONG-O\n");
         }
         quizDisplayCount--;
-// at the end of the quiz the user has the choice to take another quiz
+        // at the end of the quiz the user has the choice to take another quiz
         if (quizDisplayCount === 0) {
 
             inquirer.prompt([{
