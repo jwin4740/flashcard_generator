@@ -1,0 +1,1 @@
+{"fullText":"alexander hamilton is on the ten dollar bill","clozePart":"alexander hamilton"}

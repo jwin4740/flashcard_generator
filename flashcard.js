@@ -5,38 +5,44 @@ var fs = require("fs");
 
 // basic card constructor function
 
+
+
+// function CarPart(name) {
+//   if(this instanceof CarPart) {
+//     this.name = name;
+//   } else {
+//     return new CarPart(name);
+//   }
+// }
+
+// Note: Wheel should be made new/scope safe as well.
+
+// In the above example, within the Wheel constructor, CarPart.call is what invokes the parent constructor, known as constructor stealing. When CarPart's constructor is called, this instanceof CarPart will fail because this is an instance of Wheel.
+
+// The solution to this problem lies within the Wheel's prototype. If we set the following after the declaration of Wheel, the inheritance chain is correctly established and this instanceof CarPart will return true if this is a Wheel. 
+// function Wheel(radius) {
+//   CarPart.call(this, 'Wheel');
+//   this.radius = radius;
+// }
+// Wheel.prototype = new CarPart();
+var partialString = "";
+var textString = "";
+var novoBasicCard;
+var novoClozeCard;
+
 function BasicCard(basicFront, basicBack) {
     this.basicFront = basicFront;
     this.basicBack = basicBack;
 }
 
 function ClozeCard(fullText, clozePart) {
-	this.fullText = fullText;
+    this.fullText = fullText;
     this.clozePart = clozePart;
 }
 
-
-var novoCloze = new ClozeCard("George Washington is the first president of the United States", "George Washington");
-var textString = novoCloze.fullText;
-var partialString = textString.replace(novoCloze.clozePart, "__________");
-ClozeCard.prototype.getPartial = function () {
-	console.log(`       Your formatted ClozeCard is:\n\n       ${partialString}`);
-
+ClozeCard.prototype.getPartial = function() {
+    console.log(`Your formatted ClozeCard is:\n\n   ${partialString}`);
 }
-
-novoCloze.getPartial();
-
-
-
-
-
-
-
-
-
-
-
-
 var start = function() {
     inquirer.prompt([{
         name: "card",
@@ -53,7 +59,7 @@ var start = function() {
             case "cloze":
                 makeClozeCard();
                 break;
-            
+
             case "quizme":
                 quizMe();
                 break;
@@ -61,11 +67,11 @@ var start = function() {
             case "I don't want to learn":
                 lazy();
                 break;
-              
+
         }
-    }); 
+    });
 }
-// start();
+start();
 
 function makeBlankCard() {
     inquirer.prompt([{
@@ -90,16 +96,12 @@ function makeBlankCard() {
         var novoBasicCard = new BasicCard(answer.blankquestion, answer.blankanswer);
         // This block of code will create a file called "movies.txt".
         // It will then print "Inception, Die Hard" in the file
-        fs.appendFile("basicbank.txt", JSON.stringify(novoBasicCard) + ';', function(err) {
+        fs.appendFile("basicbank.txt", ';' + JSON.stringify(novoBasicCard), function(err) {
 
             // If the code experiences any errors it will log the error to the console.
             if (err) {
                 return console.log(err);
             }
-
-            // Otherwise, it will print: "movies.txt was updated!"
-            console.log("movies.txt was updated!");
-
         });
 
         if (answer.confirmation) {
@@ -111,10 +113,48 @@ function makeBlankCard() {
     });
 }
 
-
 function makeClozeCard() {
-    console.log("cooler");
+    inquirer.prompt([{
+            name: "fulltextq",
+            type: "input",
+            message: "Type in a question"
+
+        }, {
+            name: "clozeq",
+            type: "input",
+            message: "Type in the cloze"
+
+        }, {
+            name: "confirmation",
+            type: "confirm",
+            message: "Would you like to add another notecard?"
+        }
+
+
+    ]).then(function(answer) {
+
+        novoClozeCard = new ClozeCard(answer.fulltextq, answer.clozeq);
+        // This block of code will create a file called "movies.txt".
+        // It will then print "Inception, Die Hard" in the file
+        fs.appendFile("clozebank.txt", ';' + JSON.stringify(novoClozeCard), function(err) {
+
+            // If the code experiences any errors it will log the error to the console.
+            if (err) {
+                return console.log(err);
+            }
+
+
+            textString = novoClozeCard.fullText;
+            partialString = textString.replace(novoClozeCard.clozePart, "__________");
+            novoClozeCard.getPartial();
+        });
+    });
 }
+
+
+
+
+
 var count = 0;
 var time;
 
@@ -128,17 +168,37 @@ function lazy() {
 
 
 function quizMe() {
+    inquirer.prompt([{
+            name: "cardtype",
+            type: "list",
+            message: "Which cardset would you like to review?",
+            choices: ["cloze", "basic"]
+        }
 
-    fs.readFile("basicbank.txt", "utf8", function(error, data) {
+    ]).then(function(answer) {
+
+        if (answer.cardtype === "cloze") {
+            readBank("clozebank.txt");
+        } else {
+            readBank("basicbank.txt");
+        }
+
+    });
+}
+
+function readBank(fileName) {
+
+    fs.readFile(fileName, "utf8", function(error, data) {
         // the first parameter is always an error which gets sets to null if there is no error
         // We will then print the contents of data
-   
-        // Then split it by commas (to make it more readable)
-        var dataArr = data.split(";");
 
-        // We will then re-display the content as an array for later use.
-        var object = JSON.parse(dataArr[1]);
-        console.log(object.basicFront);
 
+
+        // var parsed = JSON.parse(data);
+        var dataArray = [];
+        dataArray.push(data);
+        console.log(dataArray);
+        var parsed = dataArray[1];
+        console.log(parsed);
     });
 }
